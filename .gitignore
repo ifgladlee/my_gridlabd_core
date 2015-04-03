@@ -1,0 +1,17 @@
+*.opensdf
+build/
+.idea/
+.gradle/
+out/
+target/
+.iws
+.ipr
+.directory
+.settings
+.classpath
+.project
+*.sdf
+Win32/
+test/
+
+
