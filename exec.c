@@ -178,15 +178,15 @@ const char *exec_getexitcodestr(EXITCODE xc)
 int64 exec_clock(void)
 {
 	static struct timeb t0;
-	struct timeb t1={0,0,0,0};
-	if ( t0.time==0 )
+	struct timeb t1 = {0,0,0,0};
+	if ( t0.time == 0 )
 	{
 		ftime(&t0);
 		t1 = t0;
 	}
 	else
 		ftime(&t1);
-	return (t1.time-t0.time)*CLOCKS_PER_SEC + (t1.millitm-t0.millitm)*CLOCKS_PER_SEC/1000;
+	return (t1.time - t0.time) * CLOCKS_PER_SEC + (t1.millitm - t0.millitm) * CLOCKS_PER_SEC / 1000;
 }
 
 /** The main system initialization sequence
@@ -1616,7 +1616,7 @@ STATUS exec_sync_getstatus(struct sync_data *d) /**< Sync data to read sync stat
  **/
 bool exec_sync_isrunning(struct sync_data *d)
 {
-	return exec_sync_get(d)<=global_stoptime && !exec_sync_isnever(d) && exec_sync_ishard(d);
+	return exec_sync_get(d) <= global_stoptime && !exec_sync_isnever(d) && exec_sync_ishard(d);
 }
 
 /******************************************************************
@@ -1850,7 +1850,7 @@ STATUS exec_start(void)
 		/* main loop runs for iteration limit, or when nothing futher occurs (ignoring soft events) */
 		while ( iteration_counter>0 
 			&& ( exec_sync_isrunning(NULL) || global_run_realtime>0 ) 
-			&& exec_getexitcode()==XC_SUCCESS ) 
+			&& exec_getexitcode() == XC_SUCCESS ) 
 		{
 			TIMESTAMP internal_synctime;
 			output_debug("*** main loop event at %lli; stoptime=%lli, n_events=%i, exitcode=%i ***", exec_sync_get(NULL), global_stoptime, exec_sync_getevents(NULL), exec_getexitcode());
@@ -1896,7 +1896,7 @@ STATUS exec_start(void)
 			/* operate delta mode if necessary (but only when event mode is active, e.g., not right after init) */
 			/* note that delta mode cannot be supported for realtime simulation */
 			global_deltaclock = 0;
-			if ( global_run_realtime==0 ) 
+			if ( global_run_realtime == 0 ) 
 			{
 				/* determine whether any modules seek delta mode */
 				DELTAMODEFLAGS flags=DMF_NONE;
@@ -2015,7 +2015,7 @@ STATUS exec_start(void)
 					if (global_debug_mode)
 					{
 						LISTITEM *item;
-						for (item=ranks[pass]->ordinal[i]->first; item!=NULL; item=item->next)
+						for (item = ranks[pass]->ordinal[i]->first; item != NULL; item = item->next)
 						{
 							OBJECT *obj = item->data;
 							// @todo change debug so it uses sync API
@@ -2030,6 +2030,7 @@ STATUS exec_start(void)
 						//sjin: if global_threadcount == 1, no pthread multhreading
 						if (global_threadcount == 1) 
 						{
+							//printf("single thread\n");
 							for (ptr = ranks[pass]->ordinal[i]->first; ptr != NULL; ptr=ptr->next) {
 								OBJECT *obj = ptr->data;
 								ss_do_object_sync(0, ptr->data);					
@@ -2045,6 +2046,8 @@ STATUS exec_start(void)
 						} 
 						else 
 						{ //sjin: implement pthreads
+							//printf("multi thread\n");
+
 							unsigned int n_items,objn=0,n;
 							unsigned int n_obj = ranks[pass]->ordinal[i]->size;
 
@@ -2129,7 +2132,7 @@ STATUS exec_start(void)
 
 				/* run all non-schedule transforms */
 				{
-					TIMESTAMP st = transform_syncall(global_clock,XS_DOUBLE|XS_COMPLEX|XS_ENDUSE);// if (abs(t)<t2) t2=t;
+					TIMESTAMP st = transform_syncall(global_clock, XS_DOUBLE | XS_COMPLEX | XS_ENDUSE);// if (abs(t)<t2) t2=t;
 					exec_sync_set(NULL,st);
 				}
 			}

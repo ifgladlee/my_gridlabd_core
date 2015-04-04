@@ -1338,18 +1338,18 @@ TIMESTAMP _object_sync(OBJECT *obj, /**< the object to synchronize */
 					  PASSCONFIG pass) /**< the pass configuration */
 {
 	CLASS *oclass = obj->oclass;
-	register TIMESTAMP plc_time=TS_NEVER, sync_time;
-	TIMESTAMP effective_valid_to = min(obj->clock+global_skipsafe,obj->valid_to);
-	int autolock = obj->oclass->passconfig&PC_AUTOLOCK;
+	register TIMESTAMP plc_time = TS_NEVER, sync_time;
+	TIMESTAMP effective_valid_to = min(obj->clock + global_skipsafe, obj->valid_to);
+	int autolock = obj->oclass->passconfig & PC_AUTOLOCK;
 
 	/* check skipsafe */
-	if(global_skipsafe>0 && (obj->flags&OF_SKIPSAFE) && ts<effective_valid_to)
+	if(global_skipsafe > 0 && (obj->flags & OF_SKIPSAFE) && ts < effective_valid_to)
 
 		/* return valid_to time if skipping */
-		return effective_valid_to;
+		return effective_valid_to;			//not runned
 
 	/* check sync */
-	if(oclass->sync==NULL)
+	if(oclass->sync == NULL)
 	{
 		char buffer[64];
 		char buffer2[64];
@@ -1371,7 +1371,7 @@ TIMESTAMP _object_sync(OBJECT *obj, /**< the object to synchronize */
 #endif
 
 	/* call recalc if recalc bit is set */
-	if( (obj->flags&OF_RECALC) && obj->oclass->recalc!=NULL)
+	if( (obj->flags & OF_RECALC) && obj->oclass->recalc != NULL)
 	{
 		if (autolock) wlock(&obj->lock);
 		oclass->recalc(obj);
@@ -1380,10 +1380,10 @@ TIMESTAMP _object_sync(OBJECT *obj, /**< the object to synchronize */
 	}
 
 	/* call PLC code on bottom-up, if any */
-	if( !(obj->flags&OF_HASPLC) && oclass->plc!=NULL && pass==PC_BOTTOMUP )
+	if( !(obj->flags & OF_HASPLC) && oclass->plc != NULL && pass == PC_BOTTOMUP )
 	{
 		if (autolock) wlock(&obj->lock);
-		plc_time = oclass->plc(obj,ts);
+		plc_time = oclass->plc(obj, ts);
 		if (autolock) wunlock(&obj->lock);
 	}
 
@@ -1391,11 +1391,11 @@ TIMESTAMP _object_sync(OBJECT *obj, /**< the object to synchronize */
 	if (autolock) wlock(&obj->lock);
 	sync_time = (*obj->oclass->sync)(obj,ts,pass);
 	if (autolock) wunlock(&obj->lock);
-	if(absolute_timestamp(plc_time)<absolute_timestamp(sync_time))
+	if(absolute_timestamp(plc_time) < absolute_timestamp(sync_time))
 		sync_time = plc_time;
 
 	/* compute valid_to time */
-	if(sync_time>TS_MAX)
+	if(sync_time > TS_MAX)
 		obj->valid_to = TS_NEVER;
 	else
 		obj->valid_to = sync_time; // NOTE, this can be negative
@@ -1421,7 +1421,7 @@ TIMESTAMP object_sync(OBJECT *obj, /**< the object to synchronize */
 					  TIMESTAMP ts, /**< the desire clock to sync to */
 					  PASSCONFIG pass) /**< the pass configuration */
 {
-	clock_t t=exec_clock();
+	clock_t t = exec_clock();
 	TIMESTAMP t2=TS_NEVER;
 	//TIMESTAMP t_start = ts;
 	//TIMESTAMP abs_t2 = ts;
@@ -1467,11 +1467,11 @@ TIMESTAMP object_sync(OBJECT *obj, /**< the object to synchronize */
 	//}
 	do {
 		/* don't call sync beyond valid horizon */
-		t2 = _object_sync(obj,(ts<(obj->valid_to>0?obj->valid_to:TS_NEVER) ? ts : obj->valid_to), pass);	
+		t2 = _object_sync(obj, (ts < (obj->valid_to > 0 ? obj->valid_to : TS_NEVER) ? ts : obj->valid_to), pass);	
 	} while (t2 > 0 && ts > (t2 < 0 ? -t2 : t2) && t2 < TS_NEVER);
 
 	/* do profiling, if needed */
-	if ( global_profiler==1 )
+	if ( global_profiler == 1 )
 	{
 		switch (pass) {
 		case PC_PRETOPDOWN: object_profile(obj,OPI_PRESYNC,t);break;

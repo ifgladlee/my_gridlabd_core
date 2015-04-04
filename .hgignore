@@ -1,0 +1,8 @@
+\.opensdf
+\.git/
+
+\.sdf
+Win32/
+test/
+
+
