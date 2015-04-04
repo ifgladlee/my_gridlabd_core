@@ -13,5 +13,5 @@ target/
 *.sdf
 Win32/
 test/
-
+.hg/
 
